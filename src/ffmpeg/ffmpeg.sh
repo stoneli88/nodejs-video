@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Thanks to https://trac.ffmpeg.org/wiki/CompilationGuide/Centos
+
 installCompilingTools() {
     echo -e "\n Installing compiling tools."
     yum  -y install autoconf automake bzip2 cmake freetype-devel gcc gcc-c++ git libtool make mercurial pkgconfig zlib-devel x264-devel

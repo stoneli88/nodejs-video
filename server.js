@@ -3,7 +3,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var videoUploader = require('./utils/videoUploader.js');
+var videoUploader = require('./src/uploader.js');
 
 // BASE SETUP
 // =============================================================================
@@ -18,7 +18,9 @@ var corsOptions = {
 // Enabling CORS Pre-Flight
 app.options('*', cors(corsOptions));
 app.use((0, cors)());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(bodyParser.json());
 
 var port = process.env.PORT || 8080; // set our port

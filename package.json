@@ -4,9 +4,11 @@
     "description": "",
     "main": "server.js",
     "dependencies": {
+        "bee-queue": "^1.2.2",
         "body-parser": "~1.18.3",
         "cors": "^2.8.4",
         "express": "~4.0.0",
+        "fluent-ffmpeg": "^2.1.2",
         "mkdirp": "~0.5.1",
         "multiparty": "~4.1.4",
         "rimraf": "~2.6.2"
