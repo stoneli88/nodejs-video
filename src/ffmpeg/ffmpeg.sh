@@ -37,7 +37,8 @@ Installx265() {
     cd ~/ffmpeg_sources
     hg clone https://bitbucket.org/multicoreware/x265
     cd ~/ffmpeg_sources/x265/build/linux
-    cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$HOME/ffmpeg_build" -DENABLE_SHARED:bool=off ../../source && make && make install
+    cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$HOME/ffmpeg_build" -DENABLE_SHARED:bool=off ../../source 
+    make && make install
 }
 
 # Requires ffmpeg to be configured with --enable-libfdk_aac (and --enable-nonfree if you also included --enable-gpl).
@@ -46,7 +47,8 @@ InstallAAC() {
     git clone --depth 1 https://github.com/mstorsjo/fdk-aac
     cd fdk-aac
     autoreconf -fiv
-    ./configure --prefix="$HOME/ffmpeg_build" --disable-shared && make && make install
+    ./configure --prefix="$HOME/ffmpeg_build" --disable-shared
+    make && make install
 }
 
 # Requires ffmpeg to be configured with --enable-libmp3lame.
@@ -119,7 +121,6 @@ CompilingFFMpeg() {
     --enable-libtheora \
     --enable-libvpx \
     --enable-libx264 \
-    --enable-libx265 \
     --enable-nonfree
     make && make install
     hash -r
@@ -147,7 +148,7 @@ then
     echo -e '===================================================='
     echo -e ' Install encoders(x264, x265 etc).'
     echo -e '===================================================='
-    Installx264 && Installx265 && InstallAAC && InstallLAME && InstallOPUS && InstallOGG && InstallVorbis && InstallTheora && InstallVPS
+    Installx264 && InstallAAC && InstallLAME && InstallOPUS && InstallOGG && InstallVorbis && InstallTheora && InstallVPS
     echo -e '===================================================='
     echo -e ' Install FFMpeg.'
     echo -e '===================================================='
@@ -159,13 +160,13 @@ then
     echo -e '===================================================='
     echo -e ' 测试FFMpeg是否安装成功(1. 生产截图, 2. 转码)'
     echo -e '===================================================='
-    ffmpeg -i 01\ -\ Dbz\ Movie\ -\ Worlds\ Strongest.rm -y -f image2 -t 0.001 -s 720x576 dbz.jpg
+    ffmpeg -i dbz.rm -y -f image2 -t 0.001 -s 720x576 dbz.jpg
     if [ -e "./dbz.jpg" ]
     then
         echo -e '===================================================='
         echo -e ' FFMpeg 生产截图成功'
         echo -e '===================================================='
-        ffmpeg -i 01\ -\ Dbz\ Movie\ -\ Worlds\ Strongest.rm \
+        ffmpeg -i dbz.rm \
         -y -metadata title="Dbz Movie Worlds" \
         -y -metadata comment="Dbz Movie Worlds videos!" \
         -c:v libx264 \

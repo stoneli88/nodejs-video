@@ -12,21 +12,24 @@ const ffmpeg = require("fluent-ffmpeg");
 const PATH = require("./config");
 
 // OUTPUT DIR
-const OUTPUT_DIR = "../video_output";
+const OUTPUT_DIR = "output";
 // Set ffmpeg path.
 ffmpeg.setFfmpegPath(path.resolve(PATH.FfmpegPath));
 ffmpeg.setFfprobePath(path.resolve(PATH.FfprobePath));
 
 // Reading video metadata.
 const getVideoMetadata = (exports.getVideoMetadata = videoPath => {
-  ffmpeg.ffprobe(path.resolve(videoPath), function (err, metadata) {
-    if (!err) {
-      return {
-        video: metadata["streams"][0],
-        audio: metadata["streams"][1],
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(path.resolve(videoPath), function(err, metadata) {
+      if (!err) {
+        resolve({
+          video: metadata["streams"][0],
+          audio: metadata["streams"][1]
+        });
+      } else {
+        reject({ err });
       }
-    }
-    console.log("FFProbe Error: " + err);
+    });
   });
 });
 
@@ -45,47 +48,49 @@ const encodeVideo = (exports.encodeVideo = task => {
     "-ac 2",
     "-r 15",
     "-c:a aac",
-    "-ar 44100",
-    '-vf "movie=a.png[watermark];scale=1364x768[scale];[scale][watermark] overlay=30:30[out]"'
+    "-ar 44100"
   ];
-  const x265Command = [
-    "-threads 0",
-    `-c:v libx265`,
-    `-preset slow`,
-    '-vf "movie=a.png[watermark];scale=1364x768[scale];[scale][watermark] overlay=30:30[out]"'
-    `-x265-params profile=main:` +
-    `bitrate=${task.bitrate}:vbv-maxrate=${task.bitrate}:vbv-bufsize=${
-        task.bitrate
-      }`
-  ];
-
-  ffmpeg(videoPath)
-    .format("mp4")
-    .withVideoCodec(videoCodec)
-    .withVideoBitrate(task.bitrate)
-    .size("640x480")
-    .autopad(true)
-    .addOutputOption(videoCodec === "x284" ? x264Command : x265Command)
-    .output(`${OUTPUT_DIR}/${outputName + task.videoSize}_${task.bitrate}.mp4`)
-    .screenshots({
-      // Will take screens at 20%, 40%, 60% and 80% of the video
-      count: 4,
-      folder: "/path/to/output"
-    })
-    .on("start", function (commandLine) {
-      console.log("Spawned Ffmpeg with command: " + commandLine);
-    })
-    .on("progress", function (progress) {
-      console.log("### progress: frames encoded: " + progress.frames);
-    })
-    .on("end", function () {
-      const endTime = Date.now();
-      console.log(
-        `### ffmpeg completed after ${(endTime - startTime) / 1000} seconds`
-      );
-    })
-    .on("error", function (err) {
-      console.log("");
-    })
-    .run();
+  const x265Command = ["-threads 0", `-c:v libx265`, `-preset slow`];
+  return new Promise((resolve, reject) => {
+    ffmpeg(videoPath)
+      .format("mp4")
+      .withVideoCodec(videoCodec)
+      .withVideoBitrate(task.bitrate)
+      .size(task.videoSize)
+      .autopad(true)
+      .addOutputOption(videoCodec === "libx264" ? x264Command : x265Command)
+      .output(
+        `${__dirname}/${OUTPUT_DIR}/${outputName}_${task.videoSize}_${
+          task.bitrate
+        }.mp4`
+      )
+      .screenshots({
+        // Will take screens at 20%, 40%, 60% and 80% of the video
+        count: 4,
+        folder: `${__dirname}/${OUTPUT_DIR}/${outputName}`
+      })
+      .on("start", function(commandLine) {
+        console.log("Spawned Ffmpeg with command: " + commandLine);
+      })
+      .on("progress", function(progress) {
+        console.log("### progress: frames encoded: " + progress.frames);
+      })
+      .on("end", function() {
+        const endTime = Date.now();
+        console.log(
+          `### ffmpeg completed after ${(endTime - startTime) / 1000} seconds`
+        );
+        resolve({
+          encode_duration: (endTime - startTime) / 1000,
+          endTime
+        });
+      })
+      .on("error", function(err) {
+        console.log("### ffmpeg error: " + err);
+        reject({
+          err
+        });
+      })
+      .run();
+  });
 });
