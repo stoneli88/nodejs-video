@@ -33,13 +33,14 @@ const getVideoMetadata = (exports.getVideoMetadata = videoPath => {
   });
 });
 
-// Encode videos
-// Every video has 3 sizes [640, 720, 1080]
+// Encode video
 const encodeVideo = (exports.encodeVideo = task => {
   const startTime = Date.now();
-  const videoPath = task.videoPath;
-  const videoCodec = task.videoCodec;
-  const outputName = task.videoName;
+  const bitrate = task.data.bitrate;
+  const videoPath = task.data.video_path;
+  const videoCodec = task.data.video_codec;
+  const outputName = task.data.video_name;
+  const videoSize = task.data.video_size;
   const x264Command = [
     "-threads 0",
     "-x264opts keyint=25",
@@ -55,25 +56,20 @@ const encodeVideo = (exports.encodeVideo = task => {
     ffmpeg(videoPath)
       .format("mp4")
       .withVideoCodec(videoCodec)
-      .withVideoBitrate(task.bitrate)
-      .size(task.videoSize)
+      .withVideoBitrate(bitrate)
+      .size(videoSize)
       .autopad(true)
       .addOutputOption(videoCodec === "libx264" ? x264Command : x265Command)
       .output(
-        `${__dirname}/${OUTPUT_DIR}/${outputName}_${task.videoSize}_${
-          task.bitrate
-        }.mp4`
+        `${__dirname}/${OUTPUT_DIR}/${outputName}_${videoSize}_${bitrate}.mp4`
       )
       .screenshots({
         // Will take screens at 20%, 40%, 60% and 80% of the video
         count: 4,
         folder: `${__dirname}/${OUTPUT_DIR}/${outputName}`
       })
-      .on("start", function(commandLine) {
-        console.log("Spawned Ffmpeg with command: " + commandLine);
-      })
       .on("progress", function(progress) {
-        console.log("### progress: frames encoded: " + progress.frames);
+        task.reportProgress(progress.percent.toFixed(2));
       })
       .on("end", function() {
         const endTime = Date.now();
