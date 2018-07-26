@@ -13,6 +13,7 @@ exports.FFPROBE_BIN = path.resolve(
   "ffmpeg",
   "ffprobe.exe"
 );
+exports.PRISMA_ENDPOINT = "127.0.0.1:4466";
 exports.REDIS_SERVER = "127.0.0.1:6379";
 exports.UPLOADED_FILES_DIR = process.env["UPLOADED_FILES_DIR"] = path.resolve(
   process.cwd(),

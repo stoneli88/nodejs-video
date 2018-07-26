@@ -3,10 +3,19 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var cors = require("cors");
+var { Prisma } = require("prisma-binding");
+var { PRISMA_ENDPOINT } = require("./src/utils/config");
 
 // API
 var uploaderAPI = require("./src/api/uploader");
 var queueAPI = require("./src/api/queue");
+
+// PRISMA SETUP
+// =============================================================================
+global.prismaInstance = new Prisma({
+  typeDefs: "src/generated/prisma.graphql",
+  endpoint: PRISMA_ENDPOINT
+});
 
 // BASE SETUP
 // =============================================================================

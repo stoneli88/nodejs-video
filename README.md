@@ -10,6 +10,8 @@ We using DOCKER to deploy every role of server include:
 
 ## Prisma
 
+`npm install -g prisma graphql-cli`
+
 ### Setup Prisma with a new MySQL Database
 
 `npm install -g prisma`
