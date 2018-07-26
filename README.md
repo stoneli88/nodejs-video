@@ -1,15 +1,30 @@
-# Nodejs Video player
+# Video Server
 
-docker run -it -v D:\Code[HOST]:/video[Container] centos /bin/bash
+We using DOCKER to deploy every role of server include:
 
-NGINX(front-end) [PLAYER]
+1. Prisma(GraphQL)
+2. FFmpeg+BeeQueue
+3. Redis
+4. MySQL
+5. FrontEnd(manager)
 
-NGINX(back-end) [UPLOADER]
+## Prisma
 
-FFMPEG(encode-decode)
+### Setup Prisma with a new MySQL Database
 
-MYSQL(data)
+`npm install -g prisma`
 
-REDIS(cache)
+`cd docker && docker-compose up -d`
 
-MQ(message)
+`prisma deploy`
+
+### Setup Prisma with a exists MySQL Database
+
+Past following contents into the docker-compose.yml
+`
+connector: mysql
+host: __YOUR_MYSQL_HOST__
+port: __YOUR_MYSQL_PORT__
+user: __YOUR_MYSQL_USER__
+password: __YOUR_MYSQL_PASSWORD__
+`

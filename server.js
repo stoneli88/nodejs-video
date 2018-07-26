@@ -37,7 +37,7 @@ var router = express.Router(); // get an instance of the express Router
 router.post("/uploads", uploaderAPI.onUpload);
 router.delete("/upload/:uuid", uploaderAPI.onDeleteFile);
 
-router.get("/queue_stats", queueAPI.getTaskStats);
+// router.get("/queue_stats", queueAPI.getTaskStats);
 
 router.post("/job", queueAPI.onCreateJob);
 // REGISTER OUR ROUTES -------------------------------

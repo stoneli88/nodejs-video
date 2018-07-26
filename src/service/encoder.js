@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", {
 
 const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
-const PATH = require("./config");
+const PATH = require("../utils/config");
 const videoBitrateMapper = {
   "480": "2500",
   "720": "5000",
@@ -24,8 +24,8 @@ const videoSizeMapper = {
 // OUTPUT DIR
 const OUTPUT_DIR = "output";
 // Set ffmpeg path.
-ffmpeg.setFfmpegPath(path.resolve(PATH.FfmpegPath));
-ffmpeg.setFfprobePath(path.resolve(PATH.FfprobePath));
+ffmpeg.setFfmpegPath(path.resolve(PATH.FFMPEG_BIN));
+ffmpeg.setFfprobePath(path.resolve(PATH.FFPROBE_BIN));
 
 // Reading video metadata.
 const getVideoMetadata = (exports.getVideoMetadata = videoPath => {
