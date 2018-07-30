@@ -3,19 +3,10 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var cors = require("cors");
-var { Prisma } = require("prisma-binding");
-var { PRISMA_ENDPOINT } = require("./src/utils/config");
 
 // API
 var uploaderAPI = require("./src/api/uploader");
 var queueAPI = require("./src/api/queue");
-
-// PRISMA SETUP
-// =============================================================================
-global.prismaInstance = new Prisma({
-  typeDefs: "src/generated/prisma.graphql",
-  endpoint: PRISMA_ENDPOINT
-});
 
 // BASE SETUP
 // =============================================================================
@@ -47,8 +38,8 @@ router.post("/uploads", uploaderAPI.onUpload);
 router.delete("/upload/:uuid", uploaderAPI.onDeleteFile);
 
 // router.get("/queue_stats", queueAPI.getTaskStats);
-
 router.post("/job", queueAPI.onCreateJob);
+
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use("/api", router);
@@ -56,4 +47,4 @@ app.use("/api", router);
 // START THE SERVER
 // =============================================================================
 app.listen(port);
-console.log("Server Working on port " + port);
+console.log("Upload Server Working on port " + port);
