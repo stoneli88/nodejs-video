@@ -38,7 +38,8 @@ router.post("/uploads", uploaderAPI.onUpload);
 router.delete("/upload/:uuid", uploaderAPI.onDeleteFile);
 
 // router.get("/queue_stats", queueAPI.getTaskStats);
-router.post("/job", queueAPI.onCreateJob);
+router.post("/new_job", queueAPI.onCreateJob);
+router.post("/fire_job", queueAPI.onProcessJob);
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
@@ -47,4 +48,4 @@ app.use("/api", router);
 // START THE SERVER
 // =============================================================================
 app.listen(port);
-console.log("Upload Server Working on port " + port);
+console.log("Queue Server Working on port " + port);

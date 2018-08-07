@@ -9,18 +9,18 @@ Object.defineProperty(exports, "__esModule", {
 
 // create JOBS.
 exports.createEncoderJOB = async (queue, jobData) => {
-  return queue
+  const job = await queue
     .createJob({
       video_path: jobData.videoPath,
-      video_codec: jobData.videoCodec,
       video_name: jobData.videoName,
-      video_size: jobData.videoSize,
-      bitrate: jobData.bitrate
+      video_size: jobData.videoSize
     })
-    .setId(`ffmpeg-${jobData.videoName}`)
+    .setId(jobData.videoUUID)
     .timeout(60 * 60 * 1000)
-    .retries(0)
+    .retries(3)
     .save();
+
+  return job;
 };
 
 // process jobs.

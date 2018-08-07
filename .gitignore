@@ -63,3 +63,4 @@ typings/
 # ffmpeg 
 ffmpeg-win
 output
+tmp

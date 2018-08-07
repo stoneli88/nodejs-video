@@ -7,13 +7,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 // -------------------------------------------------
 const fs = require("fs");
+const path = require("path");
 const mkdirp = require("mkdirp");
 const rimraf = require("rimraf");
 const multiparty = require("multiparty");
 
 const fileInputName = process.env.FILE_INPUT_NAME || "qqfile";
 const maxFileSize = process.env.MAX_FILE_SIZE || 0; // in bytes, 0 for unlimited
-const uploadedFilesPath = process.env.UPLOADED_FILES_DIR;
+const uploadedFilesPath = process.env.UPLOADED_FILES_DIR || path.resolve(process.cwd(), "tmp", "tmp_video-");
 const chunkDirName = "chunks";
 
 const onUpload = (exports.onUpload = (req, res) => {
@@ -97,6 +98,7 @@ const onChunkedUpload = (fields, file, res) => {
       () => {
         if (index < totalParts - 1) {
           responseData.success = true;
+          responseData.uuid= uuid;
           res.send(responseData);
         } else {
           combineChunks(
@@ -104,6 +106,7 @@ const onChunkedUpload = (fields, file, res) => {
             uuid,
             () => {
               responseData.success = true;
+              responseData.uuid= uuid;
               res.send(responseData);
             },
             () => {

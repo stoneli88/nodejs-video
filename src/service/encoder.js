@@ -24,8 +24,8 @@ const videoSizeMapper = {
 // OUTPUT DIR
 const OUTPUT_DIR = "output";
 // Set ffmpeg path.
-ffmpeg.setFfmpegPath(path.resolve(PATH.FFMPEG_BIN));
-ffmpeg.setFfprobePath(path.resolve(PATH.FFPROBE_BIN));
+ffmpeg.setFfmpegPath(PATH.FFMPEG_BIN);
+ffmpeg.setFfprobePath(PATH.FFPROBE_BIN);
 
 // Reading video metadata.
 const getVideoMetadata = (exports.getVideoMetadata = videoPath => {
