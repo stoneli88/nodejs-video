@@ -90,7 +90,8 @@ const onCreateJob = (exports.onCreateJob = async (req, res) => {
       });
     });
   } catch (e) {
-    console.log(`#### [Bee-Queue] Create job error: ${e}`);
+    console.log(`#### [Bee-Queue] Create job error:`);
+    console.log(e);
     res.status(500).send({
       success: false,
       error: e
