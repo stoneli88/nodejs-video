@@ -37,9 +37,10 @@ var router = express.Router(); // get an instance of the express Router
 router.post("/uploads", uploaderAPI.onUpload);
 router.delete("/upload/:uuid", uploaderAPI.onDeleteFile);
 
-// router.get("/queue_stats", queueAPI.getTaskStats);
-router.post("/new_job", queueAPI.onCreateJob);
-router.post("/fire_job", queueAPI.onProcessJob);
+router.get("/queue/stats", queueAPI.onGetJobs);
+router.delete("/queue/:jobid", queueAPI.onRemoveJob);
+router.post("/queue/create_job", queueAPI.onCreateJob);
+router.post("/queue/execute_job", queueAPI.onProcessJob);
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
