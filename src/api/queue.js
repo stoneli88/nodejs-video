@@ -4,7 +4,6 @@ const path = require('path');
 const CONFIG = require('../utils/config');
 const Queue = require('bee-queue');
 const { createEncoderJOB, processJob } = require('../service/worker');
-const { getVideoMetadata } = require('../service/encoder');
 
 // Babel Compiler
 // -------------------------------------------------
@@ -63,8 +62,6 @@ const onCreateJob = (exports.onCreateJob = async (req, res) => {
 	const { file, uuid } = req.body;
 	const videoPath = path.resolve(process.cwd(), 'tmp', `tmp_video-${uuid}`, file);
 	try {
-		videoMetadata = await getVideoMetadata(videoPath);
-		const videoSize = videoMetadata.video.coded_width;
 		const videoJob = createEncoderJOB(video_queue, {
 			videoPath: videoPath,
 			videoSize: '480',
@@ -114,26 +111,40 @@ const onProcessJob = (exports.onProcessJob = async (req, res) => {
  * * All job types: "waiting, active, or delayed"
  */
 const onGetJobs = (exports.onGetJobs = async (req, res) => {
-	const { type, size } = req.params;
+	const { type, size } = req.query;
 
-  try {
-    const jobs = await video_queue.getJobs(type, { size });
-    res.send({
-      status: true,
-      jobs
-    });
-  } catch(err) {
-    res.status(500).send({
-      status: false,
-      error: err
-    });
-  }
+	try {
+		const jobs = await video_queue.getJobs(type, { start: 0, end: size });
+		const jobIds = jobs.map((job) => job.id);
+		res.send({
+			status: true,
+			jobs: jobIds
+		});
+	} catch (err) {
+		console.log("#### [Bee-Queue]: Query quese stats found error: " + err);
+		res.status(500).send({
+			status: false,
+			error: err
+		});
+	}
 });
 
+/**
+ * * Remove job by id.
+ */
 const onRemoveJob = (exports.onRemoveJob = (req, res) => {
-  const jobId = req.params.jobid;
+	const jobId = req.params.jobid;
 
-  try {
-    const jobs = await video_queue.removeJob();
-  } catch(err) {}
+	video_queue.removeJob(jobId, (err) => {
+		if (err) {
+			res.status(500).send({
+				status: false,
+				error: err
+			});
+		}
+		res.send({
+			status: true,
+			data: 'job removed successfull.'
+		});
+	});
 });
