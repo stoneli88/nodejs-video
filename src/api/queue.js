@@ -65,11 +65,13 @@ const onCreateJob = (exports.onCreateJob = async (req, res) => {
 	const { file, uuid } = req.body;
 	const videoPath = path.resolve(process.cwd(), 'tmp', `tmp_video-${uuid}`, file);
 	try {
+		const start = Date.now();
 		const videoJob = createEncoderJOB(video_queue, {
 			videoPath: videoPath,
 			videoSize: '480',
 			videoName: file,
-			videoUUID: uuid
+			videoUUID: uuid,
+			created: start
 		});
 		videoJob.then((job) => {
 			res.send({
@@ -111,19 +113,25 @@ const onQueryJobStats = (exports.onQueryJobStats = async (req, res) => {
 
 /**
  * Query all job by its state.
- * * All job types: "waiting, active, or delayed"
+ * * All job types: "waiting, failed, succeeded, ative, or delayed"
  */
 const onGetJobs = (exports.onGetJobs = async (req, res) => {
+	let jobs = null;
 	const { jobstatus, size } = req.params;
 
 	try {
-		let jobs = await video_queue.getJobs(jobstatus, { start: 0, end: size });
+		console.log(`#### [Bee-Queue]: Beging query QUEUE with stats: ${jobstatus}`);
+		if (jobstatus === 'failed' || jobstatus === 'succeeded') {
+			jobs = await video_queue.getJobs(jobstatus, { size });
+		} else if (jobstatus === 'waiting' || jobstatus === 'active' || jobstatus === 'delayed') {
+			jobs = await video_queue.getJobs(jobstatus, { start: 0, end: size });
+		}
 		res.send({
 			status: true,
 			jobs: jobs.map((job) => ({ id: job.id, data: job.data }))
 		});
 	} catch (err) {
-		console.log('#### [Bee-Queue]: Query quese stats found error: ' + err);
+		console.log('#### [Bee-Queue]: Query queue stats found error: ' + err);
 		res.status(500).send({
 			status: false,
 			error: err

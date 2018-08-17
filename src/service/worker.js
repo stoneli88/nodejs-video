@@ -13,11 +13,14 @@ exports.createEncoderJOB = async (queue, jobData) => {
     .createJob({
       video_path: jobData.videoPath,
       video_name: jobData.videoName,
-      video_size: jobData.videoSize
+      video_size: jobData.videoSize,
+      job_created: jobData.created
     })
     .setId(jobData.videoUUID)
     .timeout(60 * 60 * 1000)
-    .retries(3)
+    .retries(1)
+    // When the job fails, wait the given number of milliseconds before retrying.
+    .backoff('exponential', 1000)
     .save();
 
   return job;
