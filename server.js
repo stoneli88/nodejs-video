@@ -35,12 +35,13 @@ var port = process.env.PORT || 8080; // set our port
 var router = express.Router(); // get an instance of the express Router
 
 router.post("/uploads", uploaderAPI.onUpload);
-router.delete("/upload/:uuid", uploaderAPI.onDeleteFile);
-
-router.get("/queue/stats", queueAPI.onGetJobs);
-router.delete("/queue/:jobid", queueAPI.onRemoveJob);
 router.post("/queue/create_job", queueAPI.onCreateJob);
-router.post("/queue/execute_job", queueAPI.onProcessJob);
+
+router.delete("/upload/:uuid", uploaderAPI.onDeleteFile);
+router.delete("/queue/:jobid", queueAPI.onRemoveJob);
+
+router.get("/queue/all/:jobstatus/:size", queueAPI.onGetJobs);
+router.get("/queue/stats/:jobid", queueAPI.onQueryJobStats);
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api

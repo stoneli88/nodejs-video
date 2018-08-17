@@ -42,6 +42,9 @@ video_queue.on('job failed', (jobId, err) => {
 	console.log(`#### [BeeQueue]: Job ${jobId} failed with error ${err.message}`);
 });
 
+// Begin to waiting jobs to process.
+processJob(video_queue);
+
 // Some reasonable period of time for all your concurrent jobs to finish
 // processing. If a job does not finish processing in this time, it will stall
 // and be retried. As such, do attempt to make your jobs idempotent, as you
@@ -85,11 +88,11 @@ const onCreateJob = (exports.onCreateJob = async (req, res) => {
 	}
 });
 
-const onProcessJob = (exports.onProcessJob = async (req, res) => {
-	const { jobId } = req.body;
+const onQueryJobStats = (exports.onQueryJobStats = async (req, res) => {
+	const { jobid } = req.params;
 
-	if (jobId) {
-		video_queue.getJob(jobId, (err, job) => {
+	if (jobid) {
+		video_queue.getJob(jobid, (err, job) => {
 			if (err) {
 				console.log(`#### [Bee-Queue] Process job error: ${err}`);
 				res.status(500).send({
@@ -97,7 +100,7 @@ const onProcessJob = (exports.onProcessJob = async (req, res) => {
 					error: err
 				});
 			}
-			console.log(`#### [Bee-Queue] Process job ${jobId} has status ${job.status}`);
+			console.log(`#### [Bee-Queue] Job ${jobid} has status ${job.status}`);
 			res.send({
 				success: true,
 				data: job.status
@@ -111,17 +114,16 @@ const onProcessJob = (exports.onProcessJob = async (req, res) => {
  * * All job types: "waiting, active, or delayed"
  */
 const onGetJobs = (exports.onGetJobs = async (req, res) => {
-	const { type, size } = req.query;
+	const { jobstatus, size } = req.params;
 
 	try {
-		const jobs = await video_queue.getJobs(type, { start: 0, end: size });
-		const jobIds = jobs.map((job) => job.id);
+		let jobs = await video_queue.getJobs(jobstatus, { start: 0, end: size });
 		res.send({
 			status: true,
-			jobs: jobIds
+			jobs: jobs.map((job) => ({ id: job.id, data: job.data }))
 		});
 	} catch (err) {
-		console.log("#### [Bee-Queue]: Query quese stats found error: " + err);
+		console.log('#### [Bee-Queue]: Query quese stats found error: ' + err);
 		res.status(500).send({
 			status: false,
 			error: err
@@ -133,7 +135,7 @@ const onGetJobs = (exports.onGetJobs = async (req, res) => {
  * * Remove job by id.
  */
 const onRemoveJob = (exports.onRemoveJob = (req, res) => {
-	const jobId = req.params.jobid;
+	const jobId = req.params;
 
 	video_queue.removeJob(jobId, (err) => {
 		if (err) {
