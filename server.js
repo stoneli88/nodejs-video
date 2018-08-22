@@ -40,6 +40,7 @@ router.post("/queue/create_job", queueAPI.onCreateJob);
 router.delete("/upload/:uuid", uploaderAPI.onDeleteFile);
 router.delete("/queue/:jobid", queueAPI.onRemoveJob);
 
+router.get("/queue/overview", queueAPI.onJobOverview);
 router.get("/queue/all/:jobstatus/:size", queueAPI.onGetJobs);
 router.get("/queue/stats/:jobid", queueAPI.onQueryJobStats);
 

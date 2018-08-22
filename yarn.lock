@@ -190,6 +190,19 @@ apollo-link-error@1.0.9:
   dependencies:
     apollo-link "^1.2.2"
 
+apollo-link-http-common@^0.2.4:
+  version "0.2.4"
+  resolved "http://10.8.90.69:9527/apollo-link-http-common/-/apollo-link-http-common-0.2.4.tgz#877603f7904dc8f70242cac61808b1f8d034b2c3"
+  dependencies:
+    apollo-link "^1.2.2"
+
+apollo-link-http@^1.5.4:
+  version "1.5.4"
+  resolved "http://10.8.90.69:9527/apollo-link-http/-/apollo-link-http-1.5.4.tgz#b80b7b4b342c655b6a5614624b076a36be368f43"
+  dependencies:
+    apollo-link "^1.2.2"
+    apollo-link-http-common "^0.2.4"
+
 apollo-link-ws@1.0.8:
   version "1.0.8"
   resolved "http://10.8.90.69:9527/apollo-link-ws/-/apollo-link-ws-1.0.8.tgz#ac1de8f29e92418728479a9a523af9f75b9ccc8b"
@@ -1095,7 +1108,7 @@ node-fetch@2.1.2:
   version "2.1.2"
   resolved "http://10.8.90.69:9527/node-fetch/-/node-fetch-2.1.2.tgz#ab884e8e7e57e38a944753cec706f788d1768bb5"
 
-node-fetch@^2.1.2:
+node-fetch@^2.1.2, node-fetch@^2.2.0:
   version "2.2.0"
   resolved "http://10.8.90.69:9527/node-fetch/-/node-fetch-2.2.0.tgz#4ee79bde909262f9775f731e3656d0db55ced5b5"
 

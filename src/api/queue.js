@@ -15,7 +15,7 @@ Object.defineProperty(exports, '__esModule', {
 let video_queue;
 
 video_queue = new Queue('video_encoder', {
-	removeOnSuccess: true,
+	removeOnSuccess: false,
 	redis: {
 		host: CONFIG.REDIS_SERVER,
 		port: 6379,
@@ -36,11 +36,14 @@ video_queue.on('job succeeded', (jobId, result) => {
 	console.log(`#### [BeeQueue]: Job ${jobId} succeeded with total time: ${result.encode_duration}`);
 });
 video_queue.on('job progress', (jobId, progress) => {
-	console.log(`#### [BeeQueue]: Job ${jobId} reported progress: ${progress}%`);
+	console.log(`#### [BeeQueue]: Job ${jobId} reported progress: ${progress}kb`);
 });
 video_queue.on('job failed', (jobId, err) => {
 	console.log(`#### [BeeQueue]: Job ${jobId} failed with error ${err.message}`);
 });
+
+// Comment In Production, Just for developer to debug.
+video_queue.destroy();
 
 // Begin to waiting jobs to process.
 processJob(video_queue);
@@ -50,7 +53,8 @@ processJob(video_queue);
 // and be retried. As such, do attempt to make your jobs idempotent, as you
 // generally should with any queue that provides at-least-once delivery.
 const TIMEOUT = 30 * 1000;
-process.on('uncaughtException', async () => {
+process.on('uncaughtException', async err => {
+	console.error(err, 'Uncaught Exception thrown');
 	// Queue#close is idempotent - no need to guard against duplicate calls.
 	try {
 		video_queue && (await video_queue.close(TIMEOUT));
@@ -62,7 +66,7 @@ process.on('uncaughtException', async () => {
 
 const onCreateJob = (exports.onCreateJob = async (req, res) => {
 	let videoMetadata = {};
-	const { file, uuid } = req.body;
+	const { file, uuid, id } = req.body;
 	const videoPath = path.resolve(process.cwd(), 'tmp', `tmp_video-${uuid}`, file);
 	try {
 		const start = Date.now();
@@ -71,6 +75,7 @@ const onCreateJob = (exports.onCreateJob = async (req, res) => {
 			videoSize: '480',
 			videoName: file,
 			videoUUID: uuid,
+			videoID: id,
 			created: start
 		});
 		videoJob.then((job) => {
@@ -142,9 +147,8 @@ const onGetJobs = (exports.onGetJobs = async (req, res) => {
 /**
  * * Remove job by id.
  */
-const onRemoveJob = (exports.onRemoveJob = (req, res) => {
+const onRemoveJob = (exports.onRemoveJob = async (req, res) => {
 	const jobId = req.params;
-
 	video_queue.removeJob(jobId, (err) => {
 		if (err) {
 			res.status(500).send({
@@ -157,4 +161,19 @@ const onRemoveJob = (exports.onRemoveJob = (req, res) => {
 			data: 'job removed successfull.'
 		});
 	});
+});
+
+const onJobOverview = (exports.onJobOverview = async (req, res) => {
+	try {
+		const counts = await video_queue.checkHealth();
+		res.send({
+			status: true,
+			data: counts
+		});
+	} catch (error) {
+		res.status(500).send({
+			status: false,
+			error: error
+		});
+	}
 });
