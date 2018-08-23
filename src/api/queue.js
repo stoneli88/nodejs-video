@@ -14,7 +14,7 @@ Object.defineProperty(exports, '__esModule', {
 
 let video_queue;
 
-video_queue = new Queue('video_encoder', {
+exports.video_queue = video_queue = new Queue('video_encoder', {
 	removeOnSuccess: false,
 	redis: {
 		host: CONFIG.REDIS_SERVER,
@@ -43,7 +43,18 @@ video_queue.on('job failed', (jobId, err) => {
 });
 
 // Comment In Production, Just for developer to debug.
-video_queue.destroy();
+process.on('SIGINT', () => {
+	video_queue.destroy();
+	process.exit();
+}); // run signal handler on CTRL-C
+process.on('SIGTERM', () => {
+	video_queue.destroy();
+	process.exit();
+}); // run signal handler on SIGTERM
+process.on('exit', () => {
+	video_queue.destroy();
+	process.exit();
+}); // run signal handler when main process exits
 
 // Begin to waiting jobs to process.
 processJob(video_queue);
@@ -53,7 +64,7 @@ processJob(video_queue);
 // and be retried. As such, do attempt to make your jobs idempotent, as you
 // generally should with any queue that provides at-least-once delivery.
 const TIMEOUT = 30 * 1000;
-process.on('uncaughtException', async err => {
+process.on('uncaughtException', async (err) => {
 	console.error(err, 'Uncaught Exception thrown');
 	// Queue#close is idempotent - no need to guard against duplicate calls.
 	try {

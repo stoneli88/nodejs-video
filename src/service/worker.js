@@ -79,7 +79,7 @@ exports.processJob = (queue) => {
 				};
 				makePromise(execute(link, operation))
 					.then((data) => console.log(`received data ${JSON.stringify(data, null, 2)}`))
-					.catch((error) => console.log(`received error ${error}`));
+          .catch((error) => console.log(`received error ${error}`));
 				done(null, ret);
 			})
 			.catch((err) => {

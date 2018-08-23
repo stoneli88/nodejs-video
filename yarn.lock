@@ -1346,6 +1346,10 @@ rimraf@~2.6.2:
   dependencies:
     glob "^7.0.5"
 
+rsync@^0.6.1:
+  version "0.6.1"
+  resolved "http://10.8.90.69:9527/rsync/-/rsync-0.6.1.tgz#3681a0098bd8750448f8bf9da1fee09f7763742b"
+
 safe-buffer@5.1.1:
   version "5.1.1"
   resolved "http://10.8.90.69:9527/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
