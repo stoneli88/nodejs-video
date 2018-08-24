@@ -36,7 +36,7 @@ video_queue.on('job succeeded', (jobId, result) => {
 	console.log(`#### [BeeQueue]: Job ${jobId} succeeded with total time: ${result.encode_duration}`);
 });
 video_queue.on('job progress', (jobId, progress) => {
-	console.log(`#### [BeeQueue]: Job ${jobId} reported progress: ${progress}kb`);
+	console.log(`#### [BeeQueue]: Job ${jobId} reported progress: ${progress}%`);
 });
 video_queue.on('job failed', (jobId, err) => {
 	console.log(`#### [BeeQueue]: Job ${jobId} failed with error ${err.message}`);

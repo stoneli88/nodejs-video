@@ -1,5 +1,6 @@
 const videoEncoder = require('./encoder');
 const fetch = require('node-fetch');
+const CONFIG = require('../utils/config');
 const { execute, makePromise } = require('apollo-link');
 const { HttpLink } = require('apollo-link-http');
 const gql = require('graphql-tag');
@@ -74,12 +75,22 @@ exports.processJob = (queue) => {
 				operation.variables = {
 					id: job.data.video_dbid,
 					isEncoded: true,
-					path: `${process.cwd()}/output/${job.data.video_id}/${job.data.video_name}_${job.data
+					path: `${CONFIG.VIDEO_SERVER}/${job.data.video_id}/${job.data.video_name}_${job.data
 						.video_size}.mp4`
 				};
 				makePromise(execute(link, operation))
-					.then((data) => console.log(`received data ${JSON.stringify(data, null, 2)}`))
-          .catch((error) => console.log(`received error ${error}`));
+					.then((data) => {
+						console.log('#### [RSYNC] Start sync the encoded video to file server.');
+						rsync.execute(function(error, stdout, stderr) {
+							// we're done
+							if (error) {
+								console.error(`#### [RSYNC] Error when execute: ${error}`);
+								process.exit();
+							}
+							console.log(`#### [RSYNC] Sync successfully done.`);
+						});
+					})
+					.catch((error) => console.log(`received error ${error}`));
 				done(null, ret);
 			})
 			.catch((err) => {

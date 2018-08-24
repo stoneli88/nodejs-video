@@ -53,15 +53,6 @@ process.on("SIGINT", quitting); // run signal handler on CTRL-C
 process.on("SIGTERM", quitting); // run signal handler on SIGTERM
 process.on("exit", quitting); // run signal handler when main process exits
 
-rsync.execute(function(error, stdout, stderr) {
-  // we're done
-  if (error) {
-    console.error(`#### [RSYNC] Error when execute: ${error}`);
-    process.exit();
-  }
-  console.log(`#### [RSYNC] Sync Server is ONLINE now.`);
-});
-
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router(); // get an instance of the express Router
