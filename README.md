@@ -1,8 +1,12 @@
-# Video Uploader Server
+# Video Queue and Sync Server
 
-1. FFmpeg+BeeQueue
-2. Redis
+1. FFmpeg
+2. BeeQueue
+3. Redis
+4. Rsync
 
-## TODO
+# How to implement
 
-1. 定时清理临时文件夹
+`
+yarn && yarn run start
+`
