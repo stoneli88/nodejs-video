@@ -5,4 +5,6 @@
 
 ## TODO
 
-1. 定时清理临时文件夹
+### Building a simple MPEG-DASH streaming player
+https://gpac.wp.imt.fr/mp4box/dash/
+https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/samples/dn551368(v=vs.85)
