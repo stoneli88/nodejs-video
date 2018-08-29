@@ -16,6 +16,8 @@ let video_queue;
 
 exports.video_queue = video_queue = new Queue('video_encoder', {
 	removeOnSuccess: false,
+	stallInterval: 5000,
+	delayedDebounce: 1000,
 	redis: {
 		host: CONFIG.REDIS_SERVER,
 		port: 6379,
@@ -30,17 +32,24 @@ video_queue.on('error', (err) => {
 	console.log(`#### [BeeQueue]: ${err.message}`);
 });
 video_queue.on('failed', (job, err) => {
+	console.log(err);
 	console.log(`#### [BeeQueue]: Job ${job.id} failed with error ${err.message}`);
+});
+video_queue.on('retrying', (job, err) => {
+	console.log(`#### [BeeQueue]: Job ${job.id} failed with error ${err.message} but is being retried!`);
+});
+video_queue.on('stalled', (jobId) => {
+	console.log(`#### [BeeQueue]: Job ${jobId} stalled and will be reprocessed`);
 });
 video_queue.on('job succeeded', (jobId, result) => {
 	console.log(`#### [BeeQueue]: Job ${jobId} succeeded with total time: ${result.encode_duration}`);
 });
-video_queue.on('job progress', (jobId, progress) => {
-	console.log(`#### [BeeQueue]: Job ${jobId} reported progress: ${progress}%`);
-});
 video_queue.on('job failed', (jobId, err) => {
 	console.log(`#### [BeeQueue]: Job ${jobId} failed with error ${err.message}`);
 });
+// video_queue.on('job progress', (jobId, progress) => {
+// 	console.log(`#### [BeeQueue]: Job ${jobId} reported progress: ${progress}%`);
+// });
 
 // Comment In Production, Just for developer to debug.
 process.on('SIGINT', () => {

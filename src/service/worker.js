@@ -1,4 +1,4 @@
-const videoEncoder = require('./encoder');
+const videoProcesser = require('./encoder');
 const fetch = require('node-fetch');
 const CONFIG = require('../utils/config');
 const { execute, makePromise } = require('apollo-link');
@@ -58,8 +58,6 @@ exports.createEncoderJOB = async (queue, jobData) => {
 		.setId(jobData.videoUUID)
 		.timeout(60 * 60 * 1000)
 		.retries(1)
-		// When the job fails, wait the given number of milliseconds before retrying.
-		.backoff('exponential', 1000)
 		.save();
 
 	return job;
@@ -69,29 +67,46 @@ exports.createEncoderJOB = async (queue, jobData) => {
 exports.processJob = (queue) => {
 	queue.process([ 1 ], (job, done) => {
 		console.log(`#### [BeeQueue]: Processing job ${job.id}`);
-		videoEncoder
+		videoProcesser
 			.encodeVideo(job)
 			.then((ret) => {
-				operation.variables = {
-					id: job.data.video_dbid,
-					isEncoded: true,
-					path: `${CONFIG.VIDEO_SERVER}/${job.data.video_id}/${job.data.video_name}_${job.data
-						.video_size}.mp4`
-				};
-				makePromise(execute(link, operation))
-					.then((data) => {
-						console.log('#### [RSYNC] Start sync the encoded video to file server.');
-						rsync.execute(function(error, stdout, stderr) {
-							// we're done
-							if (error) {
-								console.error(`#### [RSYNC] Error when execute: ${error}`);
-								process.exit();
-							}
-							console.log(`#### [RSYNC] Sync successfully done.`);
-						});
+				console.log('#### [MP4BOX] Start fragmentation the encoded video...');
+				videoProcesser
+					.fragmentationVideo(
+						job.id,
+						job.data.video_name,
+						job.data.video_size,
+						`${process.cwd()}/output/${job.data.video_id}/${job.data.video_name}_${job.data.video_size}.mp4`
+					)
+					.then(() => {
+						operation.variables = {
+							id: job.data.video_dbid,
+							isEncoded: true,
+							path: `${CONFIG.VIDEO_SERVER}/${job.data.video_id}/${job.data.video_name}_${job.data
+								.video_size}_dashinit.mp4`
+						};
+						makePromise(execute(link, operation))
+							.then((data) => {
+								console.log('#### [RSYNC] Start sync the encoded video to file server.');
+								global.rsync.execute(function(error, stdout, stderr) {
+									// we're done
+									if (error) {
+										console.error(`#### [RSYNC] Error when execute: ${error}`);
+										process.exit();
+									}
+									console.log(`#### [RSYNC] Sync successfully done.`);
+									done(null, ret);
+								});
+							})
+							.catch((error) => {
+								console.log(`received error ${error}`);
+								done(err);
+							});
 					})
-					.catch((error) => console.log(`received error ${error}`));
-				done(null, ret);
+					.catch((error) => {
+						console.log(error);
+						done('#### [MP4BOX] Error: ' + error);
+					});
 			})
 			.catch((err) => {
 				done(err);

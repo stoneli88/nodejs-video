@@ -41,7 +41,8 @@ const onGetVideoPlayAddress = (exports.onGetVideoPlayAddress = async (req, res) 
 				res.send({
 					success: true,
 					video: {
-						url: `${CONFIG.VIDEO_SERVER}/${uuid}/${name}_${size}.mp4`,
+						url: `${CONFIG.VIDEO_SERVER}/${uuid}/${name}_${size}_dashinit.mp4`,
+						xml: `${CONFIG.VIDEO_SERVER}/${uuid}/${name}_${size}.xml`,
 						mp4info: data
 							.toString()
 							.replace(/:|Codecs|String|\r|\n/g, '')
