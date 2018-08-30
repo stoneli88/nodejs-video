@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const PATH = require('../utils/config');
+const CONFIG = require('../utils/config');
 const exec = require('child_process').exec;
 const videoBitrateMapper = {
 	'480': '2500',
@@ -149,7 +150,7 @@ const encodeVideo = (exports.encodeVideo = (task) => {
 const fragmentationVideo = (exports.fragmentationVideo = (jobId, video_name, video_size, videoPath) => {
 	return new Promise((resolve, reject) => {
 		exec(
-			`mp4box -rap -dash 10000 -frag 1000 -out ${process.cwd()}/output/${jobId}/${video_name}_${video_size}.mpd ${videoPath}`,
+			`mp4box -rap -dash 4000 -frag 4000 -mpd-title ${video_name} -profile dashavc264:onDemand -base-url ${CONFIG.VIDEO_SERVER}/${jobId} -out ${process.cwd()}/output/${jobId}/${video_name}_${video_size}.mpd ${videoPath}`,
 			(error, stdout, stderr) => {
 				if (error) {
 					console.log(`#### [MP4BOX] Error when fragmentation video : ${error}`);

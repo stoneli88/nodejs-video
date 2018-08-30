@@ -47,9 +47,9 @@ video_queue.on('job succeeded', (jobId, result) => {
 video_queue.on('job failed', (jobId, err) => {
 	console.log(`#### [BeeQueue]: Job ${jobId} failed with error ${err.message}`);
 });
-// video_queue.on('job progress', (jobId, progress) => {
-// 	console.log(`#### [BeeQueue]: Job ${jobId} reported progress: ${progress}%`);
-// });
+video_queue.on('job progress', (jobId, progress) => {
+	console.log(`#### [BeeQueue]: Job ${jobId} reported progress: ${progress}%`);
+});
 
 // Comment In Production, Just for developer to debug.
 process.on('SIGINT', () => {

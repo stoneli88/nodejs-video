@@ -22,7 +22,7 @@ const UPDATE_VIDEO_MUTATION = gql`
 		$name: String
 		$description: String
 		$category: String
-		$isEncoded: Boolean
+		$isEncoded: String
 		$path: String
 	) {
 		updateVideo(
@@ -79,37 +79,50 @@ exports.processJob = (queue) => {
 						`${process.cwd()}/output/${job.data.video_id}/${job.data.video_name}_${job.data.video_size}.mp4`
 					)
 					.then(() => {
-						operation.variables = {
-							id: job.data.video_dbid,
-							isEncoded: true,
-							path: `${CONFIG.VIDEO_SERVER}/${job.data.video_id}/${job.data.video_name}_${job.data
-								.video_size}_dashinit.mp4`
-						};
-						makePromise(execute(link, operation))
-							.then((data) => {
-								console.log('#### [RSYNC] Start sync the encoded video to file server.');
-								global.rsync.execute(function(error, stdout, stderr) {
-									// we're done
-									if (error) {
-										console.error(`#### [RSYNC] Error when execute: ${error}`);
-										process.exit();
-									}
-									console.log(`#### [RSYNC] Sync successfully done.`);
-									done(null, ret);
-								});
-							})
-							.catch((error) => {
-								console.log(`received error ${error}`);
-								done(err);
-							});
+						handleSucc(job, done, ret);
 					})
 					.catch((error) => {
-						console.log(error);
-						done('#### [MP4BOX] Error: ' + error);
+						handleErr(job, done);
+						done(err);
 					});
 			})
-			.catch((err) => {
-				done(err);
+			.catch((error) => {
+				handleErr(job, done);
+				done('#### [MP4BOX] Error: ' + error);
 			});
 	});
+
+	function handleErr(job, done) {
+		operation.variables = {
+			id: job.data.video_dbid,
+			path: `${CONFIG.VIDEO_SERVER}/${job.data.video_id}/${job.data.video_name}_${job.data
+				.video_size}_dashinit.mp4`,
+			isEncoded: 'ERROR'
+		};
+		makePromise(execute(link, operation)).catch((error) => {
+			console.log(`#### [GQL] While SET isEncoded is ERROR received error ${error}`);
+			done(err);
+		});
+	}
+
+	function handleSucc(job, done, ret) {
+		operation.variables = {
+			id: job.data.video_dbid,
+			isEncoded: 'Yes',
+			path: `${CONFIG.VIDEO_SERVER}/${job.data.video_id}/${job.data.video_name}_${job.data
+				.video_size}_dashinit.mp4`
+		};
+		makePromise(execute(link, operation)).then((data) => {
+			console.log('#### [RSYNC] Start sync the encoded video to file server.');
+			global.rsync.execute(function(error, stdout, stderr) {
+				// we're done
+				if (error) {
+					console.error(`#### [RSYNC] Error when execute: ${error}`);
+					process.exit();
+				}
+				console.log(`#### [RSYNC] Sync successfully done.`);
+			});
+			done(null, ret);
+		});
+	}
 };
