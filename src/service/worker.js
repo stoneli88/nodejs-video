@@ -51,7 +51,6 @@ exports.createEncoderJOB = async (queue, jobData) => {
 			video_id: jobData.videoUUID,
 			video_path: jobData.videoPath,
 			video_name: jobData.videoName,
-			video_size: jobData.videoSize,
 			video_dbid: jobData.videoID,
 			job_created: jobData.created
 		})
@@ -71,24 +70,18 @@ exports.processJob = (queue) => {
 			.encodeVideo(job)
 			.then((ret) => {
 				console.log('#### [MP4BOX] Start fragmentation the encoded video...');
-				videoProcesser
-					.fragmentationVideo(
-						job.id,
-						job.data.video_name,
-						job.data.video_size,
-						`${process.cwd()}/output/${job.data.video_id}/${job.data.video_name}_${job.data.video_size}.mp4`
-					)
-					.then(() => {
-						handleSucc(job, done, ret);
-					})
-					.catch((error) => {
-						handleErr(job, done);
-						done(err);
-					});
+				let { sizes } = ret;
+				if (sizes) {
+					sizes = sizes.map((size) => {
+						return `${process.cwd()}/output/${job.data.video_id}/${job.data.video_name}_${size}.mp4`
+					}).join(' ');
+					console.log(sizes);
+				}
 			})
 			.catch((error) => {
 				handleErr(job, done);
-				done('#### [MP4BOX] Error: ' + error);
+				done('#### [FFMPEG] Error: ' + JSON.stringify(error));
+				console.log(error);
 			});
 	});
 

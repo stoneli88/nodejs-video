@@ -64,4 +64,4 @@ typings/
 ffmpeg-win
 output
 tmp
-.mp4
+*.mp4
